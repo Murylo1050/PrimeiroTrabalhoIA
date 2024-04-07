@@ -405,7 +405,7 @@ void cria_LabirintoGrafico(char* path) {
 	//posAtualMin.x = 12;
 	//posAtualMin.y = 1;
 	tLab_InicializaAgente(posAtualMin.x, posAtualMin.y);
-
+    
 	// Inicializa posicao da primeira estrategia do usuario (agente 1).
 	agenteAtual = 1;
 	posAtualP1.x = 0;

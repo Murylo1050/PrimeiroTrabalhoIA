@@ -30,50 +30,158 @@
 		} tipo_PosicaoPlano;
 */
 
+
+
+
+/*
+Atividade de busca cega feito pela dupla: Isadora Fernandes Santos, Murylo Dias de Oliveira Rubim
+*/
+#include "globais.h"
+#include <vector>
+#include <iostream> 
+#include "maze.h"
+#include <stdlib.h>
+
+
+using namespace std; 
+int P1_Reticulado[MAXCEL][MAXCEL];
+int P2_Reticulado[MAXCEL][MAXCEL];
+int flagRetornoLimite;
+std::vector<const char *> P1_PilhaHistorico;
+std::vector<const char*> P2_PilhaHistorico;
+
+
+
 // *** 	FUNCOES DE INICIALIZACAO E EXECUCAO DO JOGADOR 1 ***
-//	Implementacao da primeira estrategia de jogo.
+
+/*
+A estrategia adotada para o player 1 foi uma busca em profundidade limitada, na qual as direções são
+escolhidas de forma aleatoria.
+*/
 void init_Player1() {
+	for(int y=0; y<MAXCEL; y++) {
+		for(int x=0; x<MAXCEL; x++) {
+			P1_Reticulado[y][x]= -1;
+		}
+	}
+	
+	// Desmonta a pilha.
+	while (P1_PilhaHistorico.size() > 0) {
+		P1_PilhaHistorico.pop_back();
+	}
+	
+    flagRetornoLimite = 0;
 	
 }
+
 const char *run_Player1() {
-	const char *movimento;	
 	
-	// Trecho de codigo de Exemplo.
-	int move = rand()%4;
-	movimento = id_Caminhos[move];
-	// Fim de trecho de codigo de Exemplo.
-	
+	const char *movimento = "null";
+    int flag = 0;
+    int dy[4] = {-1,1,0,0};
+    int dx[4] = {0,0,-1,1};
+
+   P1_Reticulado[posAtualP1.x][posAtualP1.y] = 0;
+    
+    if(P1_PilhaHistorico.size() >= 1000){
+        flagRetornoLimite = 1;
+    }
+    
+    if(flagRetornoLimite == 1){
+
+        P1_Reticulado[posAtualP1.x][posAtualP1.y] = -1;
+        movimento = P1_PilhaHistorico[P1_PilhaHistorico.size()-1];
+        P1_PilhaHistorico.pop_back();
+
+        if(P1_PilhaHistorico.size() == 750){
+            flagRetornoLimite = 0;
+        }
+
+    }else{
+        int vet_Caminhos[NUMCAMINHOS];
+		int count_Aux = 0;
+        for(int i = 0; i<NUMCAMINHOS;i++){
+            int xnovo = posAtualP1.x + dx[i];
+            int ynovo = posAtualP1.y + dy[i];
+
+            if((maze_VerCaminho(id_Caminhos[i]) == CAMINHO) && (P1_Reticulado[xnovo][ynovo] == -1)){
+                vet_Caminhos[count_Aux] = i;
+				count_Aux++;
+                flag = 1;
+                 
+            }
+        }
+                
+        if(flag == 1){
+            int escolha = rand()%count_Aux;
+            movimento = id_Caminhos[vet_Caminhos[escolha]];
+            P1_PilhaHistorico.push_back(id_Retornos[vet_Caminhos[escolha]]);
+
+        }else{
+            movimento = P1_PilhaHistorico[P1_PilhaHistorico.size()-1];
+            P1_PilhaHistorico.pop_back();
+        }
+    }
+    
 	return movimento;
 }
 
 // *** 	FUNCOES DE INICIALIZACAO E EXECUCAO DO JOGADOR 2 ***
-//	Implementacao da segunda estrategia de jogo.
+
+
+/*
+A estrategia adotada para o player 2 foi uma busca em profundidade, na qual as direções são
+escolhidas de forma aleatoria.
+*/
 void init_Player2() {
 	
+
+    for(int y=0; y<MAXCEL; y++) {
+		for(int x=0; x<MAXCEL; x++) {
+			P2_Reticulado[y][x]= -1;
+		}
+	}
+
+	while (P2_PilhaHistorico.size() > 0) {
+		P2_PilhaHistorico.pop_back();
+	}
 }
+
 const char *run_Player2() {
-	const char *movimento;
-	
-	// Trecho de codigo de Exemplo.
-	if (maze_VerCaminho("leste") == CAMINHO) {
-		movimento = "leste";
-	}
-	else if (maze_VerCaminho("sul") == CAMINHO) {
-		movimento = "sul";
-	}
-	else if (maze_VerCaminho("oeste") == CAMINHO) {
-		movimento = "oeste";
-	}
-	else if (maze_VerCaminho("norte") == CAMINHO) {	
-		movimento = "norte";
-	}
-	else {
-		int move = rand()%4;
-		movimento = id_Caminhos[move];
-	}
-	// Fim de trecho de codigo de Exemplo.
-	
-	return movimento;
+
+    const char* movimento = "null";
+    int flag = 0;
+    int dy[4] = {-1,1,0,0};
+    int dx[4] = {0,0,-1,1};
+
+    int vet_Caminhos[NUMCAMINHOS];
+	int count_Aux = 0;
+  
+    P2_Reticulado[posAtualP2.x][posAtualP2.y] = 0;
+    
+     for(int i = 0; i<NUMCAMINHOS;i++){
+            int xnovo = posAtualP2.x + dx[i];
+            int ynovo = posAtualP2.y + dy[i];
+
+            if((maze_VerCaminho(id_Caminhos[i]) == CAMINHO) && (P2_Reticulado[xnovo][ynovo] == -1)){
+                vet_Caminhos[count_Aux] = i;
+				count_Aux++;
+                flag = 1;
+            }
+        }
+
+    if(flag == 1){
+        int escolha = rand()%count_Aux;
+        movimento = id_Caminhos[vet_Caminhos[escolha]];
+        P2_PilhaHistorico.push_back(id_Retornos[vet_Caminhos[escolha]]);
+
+    }else{
+        movimento = P2_PilhaHistorico[P2_PilhaHistorico.size()-1];
+        P2_PilhaHistorico.pop_back();
+    }
+   
+return movimento;
+   
 }
 
 
